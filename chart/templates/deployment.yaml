@@ -1,0 +1,47 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: deepak-demo-app
+  labels:
+    app: webapp
+  namespace: dk
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: webapp
+  template:
+    metadata:
+      labels:
+        app: webapp
+    spec:
+      serviceAccountName: deepak-demo-app
+      containers:
+        - name: deepak-demo-app
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          command: ["/app/webapp"]
+          args: [
+            "-licenseKeyFile",
+            "/etc/newrelic/licenseKey"
+          ]
+          ports:
+            - name: http
+              containerPort: 8000
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /status
+              port: http
+          readinessProbe:
+            httpGet:
+              path: /status
+              port: http
+          volumeMounts:
+            - name: newrelic-secret
+              mountPath: /etc/newrelic
+      volumes:
+        - name: newrelic-secret
+          secret:
+            secretName: newrelic-license
+
