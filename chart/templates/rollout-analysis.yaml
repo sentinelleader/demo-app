@@ -1,0 +1,18 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AnalysisTemplate
+metadata:
+  name: webapp-success-rate
+spec:
+  args:
+  - name: Test Gorilla App
+  metrics:
+  - name: success-rate
+    successCondition: result.successRate >= 0.95
+    interval: 60s
+    count: 5
+    provider:
+      newRelic:
+        profile: newrelic
+        query: |
+          FROM Transaction SELECT percentage(count(*), WHERE httpResponseCode <= 500) as successRate where appName = '{{ args.application-name }}'
+

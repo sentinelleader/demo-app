@@ -49,6 +49,12 @@ spec:
       steps:
       - setWeight: 20
       - pause: { duration: 10m }
+      - analysis:
+          templates:
+          - templateName: webapp-success-rate
+          args:
+          - name: service-name
+            value: deepak-demo-app-svc.default.svc.cluster.local
       - setWeight: 40
       - pause: {duration: 40s}
       - setWeight: 60
