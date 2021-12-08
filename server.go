@@ -6,7 +6,6 @@ import (
 	"io/ioutil"
 	"net/http"
 	"os"
-	"strings"
 
 	"github.com/gorilla/mux"
 	"github.com/newrelic/go-agent/v3/integrations/nrgorilla"
@@ -23,6 +22,7 @@ func statusHandler() http.Handler {
 
 func reqdHandler(msg string) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		fmt.Printf("Handling request for %s\n", r.URL.Path)
 		w.Write([]byte(msg))
 	})
 }
@@ -41,14 +41,13 @@ func main() {
 		panic("Empty license key file")
 	}
 
-	fmt.Printf("got license key %s", string(licenseKey))
 	app, err := newrelic.NewApplication(
 		newrelic.ConfigAppName("Test Gorilla App"),
 		newrelic.ConfigLicense(string(licenseKey)),
-		newrelic.ConfigDebugLogger(os.Stdout),
+		newrelic.ConfigInfoLogger(os.Stdout),
 	)
 	if nil != err {
-		panic(strings.TrimRight(string(licenseKey), "\n"))
+		panic(err)
 	}
 
 	r := mux.NewRouter()
@@ -60,5 +59,6 @@ func main() {
 	_, r.NotFoundHandler = newrelic.WrapHandle(app, "NotFoundHandler", reqdHandler("not found"))
 	_, r.MethodNotAllowedHandler = newrelic.WrapHandle(app, "MethodNotAllowedHandler", reqdHandler("method not allowed"))
 
+	fmt.Println("Starting webserver ...")
 	http.ListenAndServe(":8000", r)
 }
