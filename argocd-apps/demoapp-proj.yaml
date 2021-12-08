@@ -1,0 +1,14 @@
+---
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: deepak-demo-app
+  namespace: argocd
+spec:
+  destinations:
+  - namespace: dk
+    server: '*'
+  orphanedResources:
+    warn: true
+  sourceRepos:
+  - https://github.com/sentinelleader/demo-app

@@ -1,5 +1,5 @@
-apiVersion: apps/v1
-kind: Deployment
+apiVersion: argoproj.io/v1alpha1
+kind: Rollout
 metadata:
   name: deepak-demo-app
   labels:
@@ -44,4 +44,13 @@ spec:
         - name: newrelic-secret
           secret:
             secretName: newrelic-license
-
+  strategy:
+    canary:
+      steps:
+      - setWeight: 20
+      - setWeight: 40
+      - pause: {duration: 40s}
+      - setWeight: 60
+      - pause: {duration: 20s}
+      - setWeight: 80
+      - pause: {duration: 20s}
