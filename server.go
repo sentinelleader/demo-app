@@ -20,6 +20,13 @@ func statusHandler() http.Handler {
 	return reqdHandler("OK")
 }
 
+func failureHandler() http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte("500 - Something bad happened!"))
+	})
+}
+
 func reqdHandler(msg string) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		fmt.Printf("Handling request for %s\n", r.URL.Path)
@@ -30,6 +37,7 @@ func reqdHandler(msg string) http.Handler {
 func main() {
 
 	licenseKeyFile := flag.String("licenseKeyFile", "", "Path to the licensekey file")
+	crashMode := flag.Bool("crashMode", false, "whether app should fail requests")
 	flag.Parse()
 
 	licenseKey, err := ioutil.ReadFile(*licenseKeyFile)
@@ -53,7 +61,12 @@ func main() {
 	r := mux.NewRouter()
 	r.Use(nrgorilla.Middleware(app))
 
-	r.Handle("/", helloWorldHandler())
+	if *crashMode {
+		// fail purposefully
+		r.Handle("/", failureHandler())
+	} else {
+		r.Handle("/", helloWorldHandler())
+	}
 	r.Handle("/status", statusHandler())
 
 	_, r.NotFoundHandler = newrelic.WrapHandle(app, "NotFoundHandler", reqdHandler("not found"))
