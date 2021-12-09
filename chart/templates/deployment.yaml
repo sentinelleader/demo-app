@@ -24,7 +24,6 @@ spec:
           args: [
             "-licenseKeyFile",
             "/etc/newrelic/licenseKey",
-            "-crashMode"
           ]
           ports:
             - name: http

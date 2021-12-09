@@ -7,7 +7,7 @@ spec:
   - name: service-name
   metrics:
   - name: success-rate
-    successCondition: result.successRate >= 0.95
+    successCondition: result.successRate >= 95
     interval: 60s
     count: 5
     provider:
