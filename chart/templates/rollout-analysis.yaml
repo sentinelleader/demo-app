@@ -14,5 +14,5 @@ spec:
       newRelic:
         profile: newrelic
         query: |
-          FROM Transaction SELECT percentage(count(*), WHERE httpResponseCode <= 500) as successRate where appName = '{{ args.service-name }}'
+          FROM Transaction SELECT percentage(count(*), WHERE httpResponseCode <= 500) as successRate where appName = 'Test Gorilla App'
 
