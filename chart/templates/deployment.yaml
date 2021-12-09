@@ -23,7 +23,8 @@ spec:
           command: ["/app/webapp"]
           args: [
             "-licenseKeyFile",
-            "/etc/newrelic/licenseKey"
+            "/etc/newrelic/licenseKey",
+            "-crashMode"
           ]
           ports:
             - name: http
