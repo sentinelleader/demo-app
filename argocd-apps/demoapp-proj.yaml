@@ -8,6 +8,8 @@ spec:
   destinations:
   - namespace: dk
     server: '*'
+  - namespace: monitoring
+    server: '*'
   orphanedResources:
     warn: true
   sourceRepos:
