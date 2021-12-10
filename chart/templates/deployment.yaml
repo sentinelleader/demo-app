@@ -61,6 +61,14 @@ spec:
           - name: service-name
             value: deepak-demo-app-svc.default.svc.cluster.local
       {{ end }}
+      {{ if eq .Values.app.labelSuffix "pm" }}
+      - analysis:
+          templates:
+          - templateName: webapp-success-rate-pm
+          args:
+          - name: service-name
+            value: deepak-demo-app-svc.default.svc.cluster.local
+      {{ end }}
       - setWeight: 40
       - pause: {duration: 40s}
       - setWeight: 60

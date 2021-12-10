@@ -1,0 +1,21 @@
+{{- if eq .Values.app.labelSuffix "pm" -}}
+apiVersion: argoproj.io/v1alpha1
+kind: AnalysisTemplate
+metadata:
+  name: webapp-success-rate-pm
+spec:
+  args:
+  - name: service-name
+  metrics:
+  - name: success-rate
+    interval: 60s
+    count: 5
+    successCondition: result[0] >= 0.95
+    failureLimit: 3
+    provider:
+      prometheus:
+        address: http://prometheus-server.monitoring
+        query: |
+          sum(irate(promhttp_metric_handler_requests_total{code!~"5.*",job="prom-test"}[15m])) /
+          sum(irate(promhttp_metric_handler_requests_total{job="prom-test"}[15m]))
+{{- end -}}
