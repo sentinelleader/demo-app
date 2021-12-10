@@ -15,7 +15,7 @@ spec:
       labels:
         app: webapp-{{ .Values.app.labelSuffix }}
     spec:
-      serviceAccountName: deepak-demo-app
+      serviceAccountName: deepak-demo-app-{{ .Values.app.labelSuffix }}
       containers:
         - name: deepak-demo-app-{{ .Values.app.labelSuffix }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
