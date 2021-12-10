@@ -14,8 +14,11 @@ import (
 	muxprom "gitlab.com/msvechla/mux-prometheus/pkg/middleware"
 )
 
-func helloWorldHandler() http.Handler {
-	return reqdHandler("Hellow World")
+func helloWorldHandler(useProme bool) http.Handler {
+	if useProme {
+		return reqdHandler("Hello World (from prometheus backed webapp)")
+	}
+	return reqdHandler("Hello World")
 }
 
 func statusHandler() http.Handler {
@@ -76,7 +79,7 @@ func main() {
 		// fail purposefully
 		r.Handle("/", failureHandler())
 	} else {
-		r.Handle("/", helloWorldHandler())
+		r.Handle("/", helloWorldHandler(*useProme))
 	}
 	r.Handle("/status", statusHandler())
 
