@@ -4,14 +4,14 @@ kind: ServiceMonitor
 metadata:
   labels:
     serviceMonitorSelector: prometheus
-  name: webapp-monitor
+  name: webapp-monitor-pm
   namespace: monitoring
   labels:
     app: webapp
 spec:
   selector:
     matchLabels:
-      app: webapp
+      app: webapp-pm
   namespaceSelector:
     matchNames:
     - dk

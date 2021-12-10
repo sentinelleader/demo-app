@@ -1,0 +1,28 @@
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: deepak-demo-app-local-pm
+  namespace: argocd
+  labels:
+    environment: local
+    region: kind
+    app: deepak-demo-app-pm
+spec:
+  destination:
+    name: in-cluster
+    namespace: dk
+  project: deepak-demo-app
+  source:
+    helm:
+      valueFiles:
+      - values.yaml
+      parameters:
+        - name: app.labelSuffix
+          value: pm
+    path: chart/
+    repoURL: https://github.com/sentinelleader/demo-app
+    targetRevision: main
+  syncPolicy:
+    syncOptions:
+    - CreateNamespace=true
