@@ -66,7 +66,7 @@ func main() {
 		if nil != err {
 			panic(err)
 		}
-		nrgorilla.Middleware(app)
+		middleware = nrgorilla.Middleware(app)
 	}
 
 	r := mux.NewRouter()
