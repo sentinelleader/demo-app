@@ -10,6 +10,8 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/newrelic/go-agent/v3/integrations/nrgorilla"
 	newrelic "github.com/newrelic/go-agent/v3/newrelic"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
+	muxprom "gitlab.com/msvechla/mux-prometheus/pkg/middleware"
 )
 
 func helloWorldHandler() http.Handler {
@@ -38,28 +40,37 @@ func main() {
 
 	licenseKeyFile := flag.String("licenseKeyFile", "", "Path to the licensekey file")
 	crashMode := flag.Bool("crashMode", false, "whether app should fail requests")
+	useProme := flag.Bool("useProm", false, "use prometheus middleware instead of new relic")
 	flag.Parse()
 
-	licenseKey, err := ioutil.ReadFile(*licenseKeyFile)
-	if err != nil {
-		panic(err)
-	}
+	var middleware mux.MiddlewareFunc
+	var app *newrelic.Application
+	if *useProme {
+		instrumentation := muxprom.NewDefaultInstrumentation()
+		middleware = instrumentation.Middleware
+	} else {
+		licenseKey, err := ioutil.ReadFile(*licenseKeyFile)
+		if err != nil {
+			panic(err)
+		}
 
-	if len(licenseKey) == 0 {
-		panic("Empty license key file")
-	}
+		if len(licenseKey) == 0 {
+			panic("Empty license key file")
+		}
 
-	app, err := newrelic.NewApplication(
-		newrelic.ConfigAppName("Test Gorilla App"),
-		newrelic.ConfigLicense(string(licenseKey)),
-		newrelic.ConfigInfoLogger(os.Stdout),
-	)
-	if nil != err {
-		panic(err)
+		app, err = newrelic.NewApplication(
+			newrelic.ConfigAppName("Test Gorilla App"),
+			newrelic.ConfigLicense(string(licenseKey)),
+			newrelic.ConfigInfoLogger(os.Stdout),
+		)
+		if nil != err {
+			panic(err)
+		}
+		nrgorilla.Middleware(app)
 	}
 
 	r := mux.NewRouter()
-	r.Use(nrgorilla.Middleware(app))
+	r.Use(middleware)
 
 	if *crashMode {
 		// fail purposefully
@@ -69,8 +80,12 @@ func main() {
 	}
 	r.Handle("/status", statusHandler())
 
-	_, r.NotFoundHandler = newrelic.WrapHandle(app, "NotFoundHandler", reqdHandler("not found"))
-	_, r.MethodNotAllowedHandler = newrelic.WrapHandle(app, "MethodNotAllowedHandler", reqdHandler("method not allowed"))
+	if *useProme {
+		r.Path("/metrics").Handler(promhttp.Handler())
+	} else {
+		_, r.NotFoundHandler = newrelic.WrapHandle(app, "NotFoundHandler", reqdHandler("not found"))
+		_, r.MethodNotAllowedHandler = newrelic.WrapHandle(app, "MethodNotAllowedHandler", reqdHandler("method not allowed"))
+	}
 
 	fmt.Println("Starting webserver ...")
 	http.ListenAndServe(":8000", r)

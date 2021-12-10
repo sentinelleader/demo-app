@@ -1,3 +1,4 @@
+{{- if eq .Values.app.labelSuffix "nr" }}
 apiVersion: argoproj.io/v1alpha1
 kind: AnalysisTemplate
 metadata:
@@ -15,3 +16,4 @@ spec:
         profile: newrelic
         query: |
           FROM Transaction SELECT percentage(count(*), WHERE httpResponseCode != 500) as successRate where appName = 'Test Gorilla App' SINCE 15 minutes ago
+{{- end -}}

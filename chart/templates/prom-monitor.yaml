@@ -1,0 +1,21 @@
+{{- if eq .Values.app.labelSuffix "pm" -}}
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  labels:
+    serviceMonitorSelector: prometheus
+  name: webapp-monitor
+  namespace: monitoring
+  labels:
+    app: webapp
+spec:
+  selector:
+    matchLabels:
+      app: webapp
+  namespaceSelector:
+    matchNames:
+    - dk
+  endpoints:
+  - targetPort: 8000
+    interval: 10s
+{{- end -}}

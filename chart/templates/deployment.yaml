@@ -1,30 +1,33 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Rollout
 metadata:
-  name: deepak-demo-app
+  name: deepak-demo-app-{{ .Values.app.labelSuffix }}
   labels:
-    app: webapp
+    app: webapp-{{ .Values.app.labelSuffix }}
   namespace: dk
 spec:
   replicas: {{ .Values.replicaCount }}
   selector:
     matchLabels:
-      app: webapp
+      app: webapp-{{ .Values.app.labelSuffix }}
   template:
     metadata:
       labels:
-        app: webapp
+        app: webapp-{{ .Values.app.labelSuffix }}
     spec:
       serviceAccountName: deepak-demo-app
       containers:
-        - name: deepak-demo-app
+        - name: deepak-demo-app-{{ .Values.app.labelSuffix }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           command: ["/app/webapp"]
           args: [
             "-licenseKeyFile",
             "/etc/newrelic/licenseKey",
-            #"-crashMode"
+            #"-crashMode",
+            {{ if eq .Values.app.labelSuffix "pm" }}
+            "-useProm"
+            {{ end }}
           ]
           ports:
             - name: http
@@ -50,12 +53,14 @@ spec:
       steps:
       - setWeight: 20
       - pause: { duration: 10m }
+      {{ if eq .Values.app.labelSuffix "nr" }}
       - analysis:
           templates:
           - templateName: webapp-success-rate
           args:
           - name: service-name
             value: deepak-demo-app-svc.default.svc.cluster.local
+      {{ end }}
       - setWeight: 40
       - pause: {duration: 40s}
       - setWeight: 60
