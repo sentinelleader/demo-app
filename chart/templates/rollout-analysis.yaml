@@ -10,7 +10,7 @@ spec:
   - name: success-rate
     successCondition: result.successRate >= 95
     interval: 60s
-    count: 5
+    count: 3
     provider:
       newRelic:
         profile: newrelic
