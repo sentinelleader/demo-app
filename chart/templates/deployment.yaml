@@ -24,7 +24,6 @@ spec:
           args: [
             "-licenseKeyFile",
             "/etc/newrelic/licenseKey",
-            "-crashMode",
             {{ if eq .Values.app.labelSuffix "pm" }}
             "-useProm"
             {{ end }}
